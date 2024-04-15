@@ -3,7 +3,7 @@ Repo for the SUML project - lab 11c, group 4
 
 
 # TODO
-- [ ] Add dataset
-- [ ] Clean dataset
+- [x] Add dataset
+- [x] Clean dataset
 - [ ] Train model
-- [ ] Transform code into modules
+- [x] Transform code into modules
