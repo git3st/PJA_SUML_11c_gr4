@@ -12,9 +12,12 @@ cols_to_transform = {
 
 def preprocess_data(filename, cols_to_normalize=None, cols_to_transform=None, cols_to_remove=None):
     dataset = Dataset(filename)
-    dataset.remove_columns(cols_to_remove)
-    dataset.transform_text_values(cols_to_transform)
-    dataset.normalize(cols_to_normalize)
+    if cols_to_remove != None:
+        dataset.remove_columns(cols_to_remove)
+    if cols_to_transform != None:
+        dataset.transform_text_values(cols_to_transform)
+    if cols_to_normalize != None:
+        dataset.normalize(cols_to_normalize)
     dataset.split_data()
 
     return dataset.train_set, dataset.test_set, dataset.validate_set

@@ -1,12 +1,10 @@
-import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
 class Dataset:
     def __init__(self, filename, train=0.8, test=0.15, validation=0.05, seed=50):
-        self.full_dataset_path = os.path.join(os.path.curdir, 'datasets', filename)
-        self.full_dataset = pd.read_csv(self.full_dataset_path)
+        self.full_dataset = pd.read_csv(filename)
         self.train_set = pd.DataFrame
         self.validate_set = pd.DataFrame
         self.test_set = pd.DataFrame
