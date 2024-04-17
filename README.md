@@ -39,7 +39,7 @@ Przygotowano 2 różne procedury dotyczące przygotowania środowiska python, ni
 
 ### Przygotowanie środowiska - pip
 
-#### 1. Pobierz plik *`pip-requirements.txt`*, umieszczony w katalogu config w repozytorium projektu
+#### 1. Pobierz plik `pip-requirements.txt`, umieszczony w katalogu config w repozytorium projektu
 
 #### 2. Wykorzystując komendę `pip`, zainstaluj niezbędne komponenty zawarte w pobranym pliku
 
