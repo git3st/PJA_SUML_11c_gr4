@@ -10,7 +10,7 @@ def machine_learning(train, test, target_column):
     x_test = test.drop(target_column, axis=1)
     y_test = test[target_column]
 
-    # Encoding categorical features "Type 1" and "Type 2"
+    # Encoding features
     categorical_features = ["Event"]
     numeric_features = x_train.select_dtypes(include=["int64", "float64"]).columns
 
