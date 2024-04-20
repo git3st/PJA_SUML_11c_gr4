@@ -11,9 +11,10 @@ cols_to_transform = {
 
 
 def preprocess_data(
-    filename, cols_to_normalize=None, cols_to_transform=None, cols_to_remove=None
+    filename, cols_to_normalize=None, cols_to_transform=None, cols_to_remove=None, train=0.8, test=0.10,
+        validation=0.10, seed=50
 ):
-    dataset = Dataset(filename)
+    dataset = Dataset(filename, train=train, test=test, validation=validation, seed=seed)
     if cols_to_remove is not None:
         dataset.remove_columns(cols_to_remove)
     if cols_to_transform is not None:

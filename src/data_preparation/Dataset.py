@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 
 
 class Dataset:
-    def __init__(self, filename, train=0.8, test=0.15, validation=0.05, seed=50):
+    def __init__(self, filename, train, test, validation, seed):
         self.full_dataset = pd.read_csv(filename)
         self.train_set = pd.DataFrame
         self.validate_set = pd.DataFrame
