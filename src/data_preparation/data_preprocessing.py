@@ -1,4 +1,4 @@
-from Dataset import Dataset
+from src.data_preparation.Dataset import Dataset
 
 """
 if you need to transform something from text to numbers
