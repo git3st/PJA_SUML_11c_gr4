@@ -28,7 +28,7 @@ Przedwsięzięcie realizowane w ramach przedmiotu SUML na Polsko-Japońskiej Aka
 
 ## Polityka branchowania i wprowadzania zmian w repozytorium
 
-- Autor wdrażający funkcjonalność tworzy brancha o nazwie zgodnej ze standardem: "[inicjał]/[funkcjonalność]". Na przykład: "ak/MachineLearning".  
+- Autor wdrażający funkcjonalność tworzy brancha o nazwie zgodnej ze standardem: "feature/[inicjał]/[funkcjonalność]". Na przykład: "feature/ak/ml".  
 - Wykonanie commitów wdrażających zmiany do brancha.  
 - Utworzenie żądania zmergowania brancha z **"main"**.  
 - Zmergowanie feature brancha z main.

@@ -1,3 +1,30 @@
+# IntelliJ
+.idea/
+*.iml
+out/
+.idea_modules/
+
+### macOS
+*.DS_Store
+.AppleDouble
+.LSOverride
+.Trashes
+
+# Vim
+*~
+.*.swo
+.*.swp
+
+# emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
