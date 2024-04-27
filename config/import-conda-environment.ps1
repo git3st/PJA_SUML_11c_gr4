@@ -1,4 +1,4 @@
-$envFile = "environment.yaml"
+$envFile = "PJA_SUML_11c_gr4.yaml"
 $envName = "PJA_SUML_11c_gr4"
 
 # Check if the file exists in the current path
