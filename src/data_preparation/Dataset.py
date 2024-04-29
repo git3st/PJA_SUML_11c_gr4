@@ -1,3 +1,4 @@
+from cgi import test
 from typing import Any
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -66,9 +67,24 @@ class Dataset:
                     self.full_dataset[column] / self.full_dataset[column].abs().max()
                 )
 
-    def split_data(self):
+    def get_numeric_features(self):
+        numeric_features = self.full_dataset.select_dtypes(
+            include=["int64", "float64"]
+        ).columns
+        return numeric_features
+
+    def transform_columns(self, categorical_features):
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", StandardScaler(), self.get_numeric_features()),
+                ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+            ]
+        )
+        return preprocessor
+
+    def split_data(self, transformed_data):
         self.train_set, self.test_set = train_test_split(
-            self.full_dataset,
+            transformed_data,
             test_size=1 - self.train_proportion,
             random_state=self.seed,
         )
@@ -78,3 +94,4 @@ class Dataset:
         self.test_set, self.validate_set = train_test_split(
             self.test_set, test_size=validate_size, random_state=self.seed
         )
+        return self.train_set, self.test_set, self.validate_set

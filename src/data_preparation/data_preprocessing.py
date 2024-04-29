@@ -34,6 +34,22 @@ def preprocess_data(
     clean_outliers=False,
     cols_to_transform=None,
     cols_to_normalize=None,
+    categorical_features=[
+        "Event",
+        "White_is_deleted",
+        "White_tosViolation",
+        "White_profile_flag",
+        "White_title",
+        "Black_is_deleted",
+        "Black_tosViolation",
+        "Black_profile_flag",
+        "Black_title",
+        "ECO",
+        "Opening",
+        "TimeControl",
+        "Termination",
+        "Result",
+    ],
     train=0.8,
     test=0.10,
     validation=0.10,
@@ -57,6 +73,10 @@ def preprocess_data(
     if cols_to_normalize is not None:
         dataset.normalize(cols_to_normalize)
 
+    # Preprocess Data
+    preprocessor = dataset.transform_columns(categorical_features)
+    transformed_data = preprocessor.fit_transform(dataset.full_dataset)
+
     # Split Data
-    dataset.split_data()
-    return dataset.train_set, dataset.test_set, dataset.validate_set
+    train_set, test_set, validate_set = dataset.split_data(transformed_data)
+    return train_set, test_set, validate_set
