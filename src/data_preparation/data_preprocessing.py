@@ -1,19 +1,21 @@
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from data_preparation.Dataset import Dataset
-
-"""
-if you need to transform something from text to numbers
-format:
-cols_to_transform = {
-    'column1': {'oldvalue1': 'newvalue1', 'oldvalue2': 'newvalue2'},
-    'column2': {'oldvalue3': 'newvalue3'}
-}
-"""
 
 
 def preprocess_data(
     filename,
-    cols_to_remove=["GameID", "Round", "Site", "White", "Black"],
-    clean_missing_vals=False,
+    cols_to_remove=[
+        "GameID",
+        "Round",
+        "Site",
+        "White",
+        "Black",
+        "White_tosViolation",
+        "Black_tosViolation",
+    ],
     cols_to_fill_numbers={
         "WhiteElo": "int",
         "WhiteRatingDiff": "int",
@@ -32,16 +34,21 @@ def preprocess_data(
         "Opening": "Unknown",
     },
     clean_outliers=False,
-    cols_to_transform=None,
+    cols_to_rename=None,
+    # cols_to_rename={
+    #     "Result": "Winner",
+    # },
+    cols_to_transform={
+        "Result": {"1-0": "White", "0-1": "Black", "1/2-1/2": "Draw"},
+    },
+    clean_missing_vals=True,
     cols_to_normalize=None,
     categorical_features=[
         "Event",
         "White_is_deleted",
-        "White_tosViolation",
         "White_profile_flag",
         "White_title",
         "Black_is_deleted",
-        "Black_tosViolation",
         "Black_profile_flag",
         "Black_title",
         "ECO",
@@ -60,23 +67,47 @@ def preprocess_data(
     )
     if cols_to_remove is not None:
         dataset.remove_columns(cols_to_remove)
-    if clean_missing_vals is True:
-        dataset.clean_missing_vals()
     if cols_to_fill_numbers is not None:
         dataset.fill_missing_number_vals(cols_to_fill_numbers)
     if fill_string_values is not None:
         dataset.fill_missing_string_vals(fill_string_values)
-    if clean_outliers is True:
-        dataset.clean_outliers()
     if cols_to_transform is not None:
         dataset.transform_text_values(cols_to_transform)
+    if clean_outliers is True:
+        dataset.clean_outliers()
+    if cols_to_rename is not None:
+        dataset.rename_columns(cols_to_rename)
+    if clean_missing_vals is True:
+        dataset.clean_missing_vals()
     if cols_to_normalize is not None:
         dataset.normalize(cols_to_normalize)
 
     # Preprocess Data
-    preprocessor = dataset.transform_columns(categorical_features)
-    transformed_data = preprocessor.fit_transform(dataset.full_dataset)
+    numeric_features = dataset.full_dataset.select_dtypes(
+        include=["int64", "float64"]
+    ).columns
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("num", StandardScaler(), numeric_features),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+        ]
+    )
+    pipeline = Pipeline(
+        steps=[
+            ("preprocessor", preprocessor),
+            ("classifier", RandomForestClassifier(n_estimators=100, random_state=42)),
+        ]
+    )
+    dataset.full_dataset.to_csv(
+        "data\\02_processed_data\\processed_data.csv", index=False
+    )
+    dataset.split_data("Result")
 
-    # Split Data
-    train_set, test_set, validate_set = dataset.split_data(transformed_data)
-    return train_set, test_set, validate_set
+    return (
+        dataset.x_train,
+        dataset.y_train,
+        dataset.x_test,
+        dataset.y_test,
+        dataset.validate_set,
+        pipeline,
+    )
