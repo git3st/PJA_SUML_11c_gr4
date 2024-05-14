@@ -13,5 +13,5 @@ x_train, y_train, x_test, y_test, validate_set, pipeline = preprocess_data(
     filename="data\\01_raw_data\\full_dataset.csv"
 )
 model = machine_learning(x_train, y_train, validate_set, pipeline)
-# evaluate_model(x_test, y_test, model)
+evaluate_model(x_test, y_test, model)
 # release_model()
