@@ -1,3 +1,4 @@
+"""
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
@@ -5,9 +6,25 @@ from sklearn.metrics import (
     f1_score,
     confusion_matrix,
 )
+"""
+
+from autogluon.tabular import TabularDataset
 
 
 # Model evaluation
+def evaluate_model(x_test, y_test, predictor):
+
+    test_data = TabularDataset(x_test.sample(n=100, random_state=0))
+
+    predictions = predictor.predict(test_data)
+    print(predictor.leaderboard())
+    print(predictions)
+
+    # Export results to data\\04_evaluation_results\\
+
+
+"""
+# Model evaluation (OLD)
 def evaluate_model(x_test, y_test, classifier):
     y_pred = classifier.predict(x_test)
 
@@ -22,6 +39,4 @@ def evaluate_model(x_test, y_test, classifier):
     print("Recall:", recall)
     print("F1 Score:", f1)
     print("Confusion Matrix:\n", conf_matrix)
-
-
-# Export results to data\\03_evaluation_results\\
+"""
