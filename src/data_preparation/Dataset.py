@@ -1,17 +1,12 @@
-from cgi import test
-from typing import Any
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-
 class Dataset:
     def __init__(self, filename, train, test, validation, seed):
         self.full_dataset = pd.read_csv(filename)
-        # self.train_set = pd.DataFrame
         self.validate_set = pd.DataFrame
-        # self.test_set = pd.DataFrame
         self.x_train = pd.DataFrame
         self.x_test = pd.DataFrame
         self.y_train = pd.Series
@@ -58,7 +53,7 @@ class Dataset:
 
     def rename_columns(self, cols_to_rename):
         for column_name, new_column_name in cols_to_rename.items():
-            self.full_dataset[column_name].rename(new_column_name, inplace=True)
+            self.full_dataset.rename(columns={column_name: new_column_name}, inplace=True)
 
     def transform_text_values(self, trans_dict):
         for column, mapping in trans_dict.items():
@@ -90,7 +85,7 @@ class Dataset:
         return preprocessor
 
     def split_data(self, value):
-        x = self.full_dataset
+        x = self.full_dataset.drop(columns=[value])
         y = self.full_dataset[value]
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x,

@@ -1,9 +1,9 @@
+import argparse
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from data_preparation.Dataset import Dataset
-
 
 def preprocess_data(
     filename,
@@ -35,9 +35,6 @@ def preprocess_data(
     },
     clean_outliers=False,
     cols_to_rename=None,
-    # cols_to_rename={
-    #     "Result": "Winner",
-    # },
     cols_to_transform={
         "Result": {"1-0": "White", "0-1": "Black", "1/2-1/2": "Draw"},
     },
@@ -61,6 +58,8 @@ def preprocess_data(
     test=0.10,
     validation=0.10,
     seed=50,
+    n_estimators_pipeline=100,
+    random_state_pipeline=42
 ):
     dataset = Dataset(
         filename, train=train, test=test, validation=validation, seed=seed
@@ -95,7 +94,7 @@ def preprocess_data(
     pipeline = Pipeline(
         steps=[
             ("preprocessor", preprocessor),
-            ("classifier", RandomForestClassifier(n_estimators=100, random_state=42)),
+            ("classifier", RandomForestClassifier(n_estimators=n_estimators_pipeline, random_state=random_state_pipeline)),
         ]
     )
     dataset.full_dataset.to_csv(
