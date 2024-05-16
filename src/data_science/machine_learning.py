@@ -1,14 +1,21 @@
 from autogluon.tabular import TabularDataset, TabularPredictor
 
-def machine_learning(x_train, y_train, validate_set, use_automl, n_samples, time_limit, n_estimators, random_state):
+def machine_learning(x_train, y_train, validate_set, use_automl, n_samples, time_limit, n_estimators, random_state, pipeline):
     if use_automl:
-        train_data = TabularDataset(x_train.sample(n=n_samples, random_state=random_state))
+        # Połącz x_train i y_train, aby utworzyć pełny zestaw danych z etykietami
+        train_data = x_train.sample(n=n_samples, random_state=random_state)
+        train_data['Result'] = y_train.loc[train_data.index]
+        
+        # Debug: Print columns in train_data
+        print("Columns in train_data for AutoML:", train_data.columns)
         predictor = TabularPredictor(
             label="Result", path="models", eval_metric="accuracy"
         ).fit(train_data, time_limit=time_limit, presets="medium_quality")
         return predictor
     else:
-        from sklearn.ensemble import RandomForestClassifier
-        model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
-        model.fit(x_train, y_train)
-        return model
+        # Dopasuj potok do danych treningowych
+        pipeline.fit(x_train, y_train)
+        x_train_processed = pipeline.named_steps['preprocessor'].transform(x_train)
+        model = pipeline.named_steps['classifier']
+        model.fit(x_train_processed, y_train)
+        return pipeline

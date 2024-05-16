@@ -39,7 +39,7 @@ def main():
     
     model = machine_learning(
         x_train, y_train, validate_set, args.use_automl,
-        args.n_samples, args.time_limit, args.n_estimators, args.seed
+        args.n_samples, args.time_limit, args.n_estimators, args.seed, pipeline
     )
     evaluate_model(x_test, y_test, model, args.n_samples_evaluate, args.random_state_evaluate)
     # release_model()

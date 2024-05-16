@@ -52,7 +52,6 @@ def preprocess_data(
         "Opening",
         "TimeControl",
         "Termination",
-        "Result",
     ],
     train=0.8,
     test=0.10,
@@ -72,6 +71,10 @@ def preprocess_data(
         dataset.fill_missing_string_vals(fill_string_values)
     if cols_to_transform is not None:
         dataset.transform_text_values(cols_to_transform)
+    
+    # Debug: Print columns after transformation
+    print("Columns after transformation:", dataset.full_dataset.columns)
+    
     if clean_outliers is True:
         dataset.clean_outliers()
     if cols_to_rename is not None:
@@ -81,10 +84,14 @@ def preprocess_data(
     if cols_to_normalize is not None:
         dataset.normalize(cols_to_normalize)
 
-    # Preprocess Data
-    numeric_features = dataset.full_dataset.select_dtypes(
-        include=["int64", "float64"]
-    ).columns
+    # Debug: Check if 'Result' column is present
+    if 'Result' not in dataset.full_dataset.columns:
+        print("Error: 'Result' column is missing in the dataset after preprocessing.")
+        print("Columns in dataset:", dataset.full_dataset.columns)
+
+    # Remove 'Result' from features for preprocessing
+    features = dataset.full_dataset.drop(columns=['Result'])
+    numeric_features = features.select_dtypes(include=["int64", "float64"]).columns
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), numeric_features),

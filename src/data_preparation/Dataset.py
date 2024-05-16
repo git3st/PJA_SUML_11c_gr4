@@ -85,6 +85,11 @@ class Dataset:
         return preprocessor
 
     def split_data(self, value):
+        # Debug: Check if 'Result' column is present before splitting
+        if value not in self.full_dataset.columns:
+            print(f"Error: '{value}' column is missing in the dataset before splitting.")
+            print("Columns in dataset:", self.full_dataset.columns)
+        
         x = self.full_dataset.drop(columns=[value])
         y = self.full_dataset[value]
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
@@ -96,6 +101,11 @@ class Dataset:
         validate_size = self.validate_proportion / (
             self.validate_proportion + self.test_proportion
         )
-        self.x_test, self.validate_set = train_test_split(
-            self.x_test, test_size=validate_size, random_state=self.seed
+        self.x_test, self.validate_set, self.y_test, self.validate_y = train_test_split(
+            self.x_test, self.y_test, test_size=validate_size, random_state=self.seed
         )
+
+        # Debug: Check shapes of the split datasets
+        print(f"x_train shape: {self.x_train.shape}, y_train shape: {self.y_train.shape}")
+        print(f"x_test shape: {self.x_test.shape}, y_test shape: {self.y_test.shape}")
+        print(f"validate_set shape: {self.validate_set.shape}, validate_y shape: {self.validate_y.shape}")
