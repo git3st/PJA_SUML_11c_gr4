@@ -8,7 +8,7 @@ def evaluate_model(x_test, y_test, predictor, n_samples_evaluate, random_state_e
         print(predictor.leaderboard())
         print(predictions)
     else:
-        # Przetwórz dane testowe za pomocą potoku
+        # Process test data
         x_test_sampled = x_test.sample(n=n_samples_evaluate, random_state=random_state_evaluate)
         y_test_sampled = y_test.loc[x_test_sampled.index]
         
@@ -19,7 +19,7 @@ def evaluate_model(x_test, y_test, predictor, n_samples_evaluate, random_state_e
         
         y_pred = predictor.named_steps['classifier'].predict(x_test_processed)
         
-        # Wypisz metryki ewaluacji
+        # Print evaluation metrics
         accuracy = accuracy_score(y_test_sampled, y_pred)
         precision = precision_score(y_test_sampled, y_pred, average='weighted')
         recall = recall_score(y_test_sampled, y_pred, average='weighted')

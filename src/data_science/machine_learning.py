@@ -2,7 +2,7 @@ from autogluon.tabular import TabularDataset, TabularPredictor
 
 def machine_learning(x_train, y_train, validate_set, use_automl, n_samples, time_limit, n_estimators, random_state, pipeline):
     if use_automl:
-        # Połącz x_train i y_train, aby utworzyć pełny zestaw danych z etykietami
+        # Merge with x_train and y_train
         train_data = x_train.sample(n=n_samples, random_state=random_state)
         train_data['Result'] = y_train.loc[train_data.index]
         
@@ -13,7 +13,7 @@ def machine_learning(x_train, y_train, validate_set, use_automl, n_samples, time
         ).fit(train_data, time_limit=time_limit, presets="medium_quality")
         return predictor
     else:
-        # Dopasuj potok do danych treningowych
+        # Adjust to training data
         pipeline.fit(x_train, y_train)
         x_train_processed = pipeline.named_steps['preprocessor'].transform(x_train)
         model = pipeline.named_steps['classifier']
