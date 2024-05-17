@@ -1,6 +1,5 @@
 import os
 
-
 def merge_files(file_prefix, num_files, output_file):
     """
     Merges csv files into one big file, only if the output file doesn't exist in the provided location.
