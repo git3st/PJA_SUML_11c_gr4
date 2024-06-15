@@ -122,7 +122,7 @@ def preprocess_data(
         "Opening": "Unknown",
     },
     clean_outliers: bool = False,
-    cols_to_rename: Dict[str, str] = {"Date": "Day"},
+    #cols_to_rename: Dict[str, str] = {"Date": "Day"},
     #cols_to_round: List[str] = ["Average_White_Play_Time", "Average_Black_Play_Time"],
     #cols_to_transform_date: List[str] = ["Date"],
     #cols_to_transform_time: List[str] = ["Time"],
@@ -222,8 +222,8 @@ def preprocess_data(
             dataset.clean_outliers()
         if clean_missing_vals is True:
             dataset.clean_missing_vals()
-        if cols_to_rename is not None:
-            dataset.rename_columns(cols_to_rename)
+        #if cols_to_rename is not None:
+        #    dataset.rename_columns(cols_to_rename)
         if cols_to_normalize is not None:
             dataset.normalize(cols_to_normalize)
 
