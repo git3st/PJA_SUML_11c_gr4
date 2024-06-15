@@ -72,17 +72,33 @@ def round_columns_to_int(dataset: Dataset, columns: List[str]):
 def preprocess_data(
     filename: str,
     cols_to_remove: List[str] = [
+        "Black_count_all",
+        "Black_createdAt",
+        "Black_is_deleted",
+        "Black_playTime_total",
+        "Black_profile_flag",
+        "Black_title",
+        "Black_tosViolation",
+        #"Date",
+        "ECO",
+        "Event",
         "GameID",
+        "Moves",
+        "Opening",
         "Round",
         "Site",
-        "White",
-        "Black",
-        "White_tosViolation",
-        "Black_tosViolation",
+        "Termination",
+        #"Time",
+        "TimeControl",
+        "TotalMoves",
+        "White_count_all",
         "White_createdAt",
-        "Black_createdAt",
-        "Moves",
-    ],
+        "White_is_deleted",
+        "White_playTime_total",
+        "White_profile_flag",
+        "White_title",
+        "White_tosViolation",
+        ],
     cols_to_fill_numbers: Dict[str, str] = {
         "WhiteElo": "int",
         "WhiteRatingDiff": "int",
@@ -102,9 +118,9 @@ def preprocess_data(
     },
     clean_outliers: bool = False,
     cols_to_rename: Dict[str, str] = {"Date": "Day"},
-    cols_to_round: List[str] = ["Average_White_Play_Time", "Average_Black_Play_Time"],
-    cols_to_transform_date: List[str] = ["Date"],
-    cols_to_transform_time: List[str] = ["Time"],
+    #cols_to_round: List[str] = ["Average_White_Play_Time", "Average_Black_Play_Time"],
+    #cols_to_transform_date: List[str] = ["Date"],
+    #cols_to_transform_time: List[str] = ["Time"],
     cols_to_transform: Dict[str, Dict[str, str]] = {
         "Result": {"1-0": "White", "0-1": "Black", "1/2-1/2": "Draw"},
         "Event": {"tournament*": "tournament", "swiss*": "swiss"},
@@ -171,26 +187,28 @@ def preprocess_data(
     dataset = Dataset(
         filename, train=train, test=test, validation=validation, seed=seed
     )
+
+    pipeline = None
+
     try:
-        if cols_to_remove is not None:
-            dataset.remove_columns(cols_to_remove)
         if cols_to_fill_numbers is not None:
             dataset.fill_missing_number_vals(cols_to_fill_numbers)
         if fill_string_values is not None:
             dataset.fill_missing_string_vals(fill_string_values)
-        if cols_to_transform_date is not None:
-            dataset.transform_date_to_day(cols_to_transform_date)
-        if cols_to_transform_time is not None:
-            dataset.transform_time_to_category(cols_to_transform_time)
+        #if cols_to_transform_date is not None:
+        #    dataset.transform_date_to_day(cols_to_transform_date)
+        #if cols_to_transform_time is not None:
+        #    dataset.transform_time_to_category(cols_to_transform_time)
         if cols_to_transform is not None:
             dataset.transform_text_values(cols_to_transform)
 
+
         # Calculate custom features
-        calculate_average_time(dataset)
+        #calculate_average_time(dataset)
 
         # Round numeric values
-        if cols_to_round is not None:
-            round_columns_to_int(dataset, cols_to_round)
+        #if cols_to_round is not None:
+        #    round_columns_to_int(dataset, cols_to_round)
 
         # Debug: Print columns after transformation
         print("Columns after transformation:", dataset.full_dataset.columns)
@@ -216,15 +234,21 @@ def preprocess_data(
             logger.error("Columns in dataset: %s", dataset.full_dataset.columns)
             raise KeyError("'Result' column not found.")
 
+        if cols_to_remove is not None:
+            dataset.remove_columns(cols_to_remove)
+
         # Remove 'Result' from features for preprocessing
         features = dataset.full_dataset.drop(columns=["Result"])
+        print(features)
         numeric_features = features.select_dtypes(include=["int64", "float64"]).columns
+        print(numeric_features)
         preprocessor = ColumnTransformer(
             transformers=[
                 ("num", StandardScaler(), numeric_features),
                 ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
             ]
         )
+        print(pipeline)
         pipeline = Pipeline(
             steps=[
                 ("preprocessor", preprocessor),

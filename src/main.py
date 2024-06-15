@@ -1,4 +1,6 @@
 import argparse
+import os
+
 from data_preparation.merge_files import merge_files
 from data_preparation.data_preprocessing import preprocess_data
 from data_science.machine_learning import machine_learning
@@ -8,6 +10,9 @@ import pandas as pd
 
 
 def main():
+    current_path = os.path.realpath(__file__)
+    parent_dir = os.path.dirname(os.path.dirname(current_path))
+
     parser = argparse.ArgumentParser(description="Chess Game Result Predictor")
     parser.add_argument(
         "--file_prefix",
@@ -16,7 +21,7 @@ def main():
     )
     parser.add_argument("--num_files", type=int, default=16)
     parser.add_argument(
-        "--output_file", type=str, default="data\\01_raw_data\\full_dataset.csv"
+        "--output_file", type=str, default=os.path.join(parent_dir, 'data', '01_raw_data', 'full_dataset.csv')
     )
     parser.add_argument("--use_automl", action="store_true", default=False)
     parser.add_argument(
