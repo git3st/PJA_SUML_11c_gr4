@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 from typing import Dict, List, Tuple
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
@@ -8,6 +9,8 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import pandas as pd
 from data_preparation.Dataset import Dataset
 
+current_path = os.path.realpath(__file__)
+parent_dir = os.path.dirname(os.path.dirname(current_path))
 
 def create_error_logger() -> logging.Logger:
     """
@@ -262,7 +265,7 @@ def preprocess_data(
             ]
         )
         dataset.full_dataset.to_csv(
-            "data\\02_processed_data\\processed_data.csv", index=False
+            os.makedirs(os.path.join(parent_dir, 'data', '02_processed_data', 'processed_data.csv' ), exist_ok=True), index=False
         )
         dataset.split_data("Result")
     except Exception as e:

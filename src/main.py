@@ -17,7 +17,7 @@ def main():
     parser.add_argument(
         "--file_prefix",
         type=str,
-        default="data\\01_raw_data\\games_metadata_profile_2024_01",
+        default=os.path.join(parent_dir, 'data', '01_raw_data', 'games_metadata_profile_2024_01', )
     )
     parser.add_argument("--num_files", type=int, default=16)
     parser.add_argument(
