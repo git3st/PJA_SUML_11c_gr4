@@ -75,8 +75,8 @@ def round_columns_to_int(dataset: Dataset, columns: List[str]):
 def preprocess_data(
     filename: str,
     cols_to_remove: List[str] = [
-        "White_rating_diff",
-        "Black_rating_diff",
+        "WhiteRatingDiff",
+        "BlackRatingDiff",
         "Black_count_all",
         "Black_createdAt",
         "Black_is_deleted",
