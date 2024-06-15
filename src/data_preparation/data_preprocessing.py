@@ -75,6 +75,8 @@ def round_columns_to_int(dataset: Dataset, columns: List[str]):
 def preprocess_data(
     filename: str,
     cols_to_remove: List[str] = [
+        "White_rating_diff",
+        "Black_rating_diff",
         "Black_count_all",
         "Black_createdAt",
         "Black_is_deleted",
@@ -82,7 +84,7 @@ def preprocess_data(
         "Black_profile_flag",
         "Black_title",
         "Black_tosViolation",
-        #"Date",
+        "Date",
         "ECO",
         "Event",
         "GameID",
@@ -91,7 +93,7 @@ def preprocess_data(
         "Round",
         "Site",
         "Termination",
-        #"Time",
+        "Time",
         "TimeControl",
         "TotalMoves",
         "White_count_all",
