@@ -23,7 +23,7 @@ def main():
     parser.add_argument(
         "--output_file", type=str, default=os.path.join(parent_dir, 'data', '01_raw_data', 'full_dataset.csv')
     )
-    parser.add_argument("--use_automl", action="store_true", default=False)
+    parser.add_argument("--use_automl", action="store_true", default=True)
     parser.add_argument(
         "--train",
         type=float,

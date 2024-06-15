@@ -63,7 +63,7 @@ def evaluate_model(
         if isinstance(predictor, TabularPredictor):
             # AutoGluon TabularPredictor
             test_data = TabularDataset(
-                x_test.sample(n=n_samples_evaluate, random_state=random_state_evaluate)
+                x_test.sample(n=n_samples_evaluate, random_state=random_state_evaluate, replace=True)
             )
             predictions = predictor.predict(test_data)
             print(predictor.leaderboard())
