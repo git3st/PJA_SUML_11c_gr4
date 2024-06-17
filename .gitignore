@@ -194,3 +194,4 @@ data/01_raw_data/full_dataset.csv
 processed_data.csv
 test.csv
 train.csv
+models
