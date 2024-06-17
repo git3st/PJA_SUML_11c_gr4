@@ -1,12 +1,10 @@
 import argparse
 import os
-
 from data_preparation.merge_files import merge_files
-from data_preparation.data_preprocessing import preprocess_data
+from data_preparation.data_preprocessing import transform_data
 from data_science.machine_learning import machine_learning
 from data_science.evaluate_model import evaluate_model
 from data_science.release_model import release_model
-import pandas as pd
 
 
 def main():
@@ -17,11 +15,18 @@ def main():
     parser.add_argument(
         "--file_prefix",
         type=str,
-        default=os.path.join(parent_dir, 'data', '01_raw_data', 'games_metadata_profile_2024_01', )
+        default=os.path.join(
+            parent_dir,
+            "data",
+            "01_raw_data",
+            "games_metadata_profile_2024_01",
+        ),
     )
     parser.add_argument("--num_files", type=int, default=16)
     parser.add_argument(
-        "--output_file", type=str, default=os.path.join(parent_dir, 'data', '01_raw_data', 'full_dataset.csv')
+        "--output_file",
+        type=str,
+        default=os.path.join(parent_dir, "data", "01_raw_data", "full_dataset.csv"),
     )
     parser.add_argument("--use_automl", action="store_true", default=True)
     parser.add_argument(
@@ -92,7 +97,7 @@ def main():
 
     merge_files(args.file_prefix, args.num_files, args.output_file)
 
-    x_train, y_train, x_test, y_test, validate_set, pipeline = preprocess_data(
+    x_train, y_train, x_test, y_test, validate_set, pipeline = transform_data(
         filename=args.output_file,
         train=args.train,
         test=args.test,

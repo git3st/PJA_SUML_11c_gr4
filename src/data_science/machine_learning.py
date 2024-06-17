@@ -58,7 +58,9 @@ def machine_learning(
     try:
         if use_automl:
             # Merge with x_train and y_train
-            train_data = x_train.sample(n=n_samples, random_state=random_state, replace=True)
+            train_data = x_train.sample(
+                n=n_samples, random_state=random_state, replace=True
+            )
             train_data["Result"] = y_train.loc[train_data.index]
 
             # Debug: Print columns in train_data

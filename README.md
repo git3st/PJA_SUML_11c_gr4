@@ -35,7 +35,10 @@ Przedwsięzięcie realizowane w ramach przedmiotu SUML na Polsko-Japońskiej Aka
 
 ## Przygotowanie środowiska
 
-Przygotowano 2 różne procedury dotyczące przygotowania środowiska python, niezbędnego do uruchomienia modelu oraz aplikacji.
+Przygotowano 2 dostępne procedury dotyczące przygotowania środowiska python, niezbędnego do uruchomienia modelu oraz aplikacji:
+
+- Przygotowanie środowiska w Condzie  
+- Przygotowanie środowiska, za pomocą pip  
 
 ### Przygotowanie środowiska - pip
 
@@ -77,9 +80,6 @@ Procedura wspierana dla następujących wersji oprogramowania:
 **4.** Uruchomić skrypt *`import-conda-environment.ps1`*.  
 **5.** Po poprawnym imporcie środowiska, w konsoli powinien pojawić się komunikat: *"Environment PJA_SUML_11c_gr4 successfully created and activated."*.
 
-## TODO
+### Uruchomienie aplikacji
 
-- [x] Add dataset
-- [x] Clean dataset
-- [ ] Train model
-- [x] Transform code into modules
+TO DO
