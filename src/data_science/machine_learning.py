@@ -1,6 +1,6 @@
 import logging
 from typing import Union
-from autogluon.tabular import TabularDataset, TabularPredictor
+from autogluon.tabular import TabularPredictor
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
@@ -58,7 +58,9 @@ def machine_learning(
     try:
         if use_automl:
             # Merge with x_train and y_train
-            train_data = x_train.sample(n=n_samples, random_state=random_state)
+            train_data = x_train.sample(
+                n=n_samples, random_state=random_state, replace=True
+            )
             train_data["Result"] = y_train.loc[train_data.index]
 
             # Debug: Print columns in train_data

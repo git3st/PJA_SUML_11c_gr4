@@ -1,5 +1,5 @@
-import argparse
 import logging
+import os
 from typing import Dict, List, Tuple
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
@@ -7,6 +7,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import pandas as pd
 from data_preparation.Dataset import Dataset
+
+current_path = os.path.realpath(__file__)
+parent_dir = os.path.dirname(os.path.dirname(current_path))
 
 
 def create_error_logger() -> logging.Logger:
@@ -41,15 +44,23 @@ def calculate_average_time(
         count_columns (List[str]): List of columns with the number of games played for each group.
         output_column_names (List[str]): List of names for the new columns containing average play times.
     """
-
-    for time_col, count_col, output_col in zip(
-        time_columns, count_columns, output_column_names
-    ):
-        non_zero_rows = dataset.full_dataset[count_col] != 0
-        dataset.full_dataset.loc[non_zero_rows, output_col] = (
-            dataset.full_dataset.loc[non_zero_rows, time_col]
-            / dataset.full_dataset.loc[non_zero_rows, count_col]
-        ).fillna(0)
+    try:
+        for time_col, count_col, output_col in zip(
+            time_columns, count_columns, output_column_names
+        ):
+            non_zero_rows = dataset.full_dataset[count_col] != 0
+            dataset.full_dataset.loc[non_zero_rows, output_col] = (
+                dataset.full_dataset.loc[non_zero_rows, time_col]
+                / dataset.full_dataset.loc[non_zero_rows, count_col]
+            ).fillna(0)
+    except KeyError as e:
+        logger.error("Missing column(s): %s", e)
+    except ZeroDivisionError as e:
+        logger.error(f"Division by zero error in column '{count_col}': %s", e)
+    except TypeError as e:
+        logger.error("Type error in calculation (check data types): %s", e)
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
 
 
 def round_columns_to_int(dataset: Dataset, columns: List[str]):
@@ -69,19 +80,37 @@ def round_columns_to_int(dataset: Dataset, columns: List[str]):
         raise
 
 
-def preprocess_data(
+def transform_data(
     filename: str,
     cols_to_remove: List[str] = [
+        "WhiteRatingDiff",
+        "BlackRatingDiff",
+        "Black_count_all",
+        "Black_createdAt",
+        "Black_is_deleted",
+        "Black_playTime_total",
+        "Black_profile_flag",
+        "Black_title",
+        "Black_tosViolation",
+        "Date",
+        "ECO",
+        "Event",
         "GameID",
+        "Moves",
+        "Opening",
         "Round",
         "Site",
-        "White",
-        "Black",
-        "White_tosViolation",
-        "Black_tosViolation",
+        "Termination",
+        "Time",
+        "TimeControl",
+        "TotalMoves",
+        "White_count_all",
         "White_createdAt",
-        "Black_createdAt",
-        "Moves",
+        "White_is_deleted",
+        "White_playTime_total",
+        "White_profile_flag",
+        "White_title",
+        "White_tosViolation",
     ],
     cols_to_fill_numbers: Dict[str, str] = {
         "WhiteElo": "int",
@@ -101,10 +130,10 @@ def preprocess_data(
         "Opening": "Unknown",
     },
     clean_outliers: bool = False,
-    cols_to_rename: Dict[str, str] = {"Date": "Day"},
-    cols_to_round: List[str] = ["Average_White_Play_Time", "Average_Black_Play_Time"],
-    cols_to_transform_date: List[str] = ["Date"],
-    cols_to_transform_time: List[str] = ["Time"],
+    # cols_to_rename: Dict[str, str] = {"Date": "Day"},
+    # cols_to_round: List[str] = ["Average_White_Play_Time", "Average_Black_Play_Time"],
+    # cols_to_transform_date: List[str] = ["Date"],
+    # cols_to_transform_time: List[str] = ["Time"],
     cols_to_transform: Dict[str, Dict[str, str]] = {
         "Result": {"1-0": "White", "0-1": "Black", "1/2-1/2": "Draw"},
         "Event": {"tournament*": "tournament", "swiss*": "swiss"},
@@ -171,26 +200,27 @@ def preprocess_data(
     dataset = Dataset(
         filename, train=train, test=test, validation=validation, seed=seed
     )
+
+    pipeline = None
+
     try:
-        if cols_to_remove is not None:
-            dataset.remove_columns(cols_to_remove)
         if cols_to_fill_numbers is not None:
             dataset.fill_missing_number_vals(cols_to_fill_numbers)
         if fill_string_values is not None:
             dataset.fill_missing_string_vals(fill_string_values)
-        if cols_to_transform_date is not None:
-            dataset.transform_date_to_day(cols_to_transform_date)
-        if cols_to_transform_time is not None:
-            dataset.transform_time_to_category(cols_to_transform_time)
+        # if cols_to_transform_date is not None:
+        #    dataset.transform_date_to_day(cols_to_transform_date)
+        # if cols_to_transform_time is not None:
+        #    dataset.transform_time_to_category(cols_to_transform_time)
         if cols_to_transform is not None:
             dataset.transform_text_values(cols_to_transform)
 
         # Calculate custom features
-        calculate_average_time(dataset)
+        # calculate_average_time(dataset)
 
         # Round numeric values
-        if cols_to_round is not None:
-            round_columns_to_int(dataset, cols_to_round)
+        # if cols_to_round is not None:
+        #    round_columns_to_int(dataset, cols_to_round)
 
         # Debug: Print columns after transformation
         print("Columns after transformation:", dataset.full_dataset.columns)
@@ -199,8 +229,8 @@ def preprocess_data(
             dataset.clean_outliers()
         if clean_missing_vals is True:
             dataset.clean_missing_vals()
-        if cols_to_rename is not None:
-            dataset.rename_columns(cols_to_rename)
+        # if cols_to_rename is not None:
+        #    dataset.rename_columns(cols_to_rename)
         if cols_to_normalize is not None:
             dataset.normalize(cols_to_normalize)
 
@@ -216,15 +246,21 @@ def preprocess_data(
             logger.error("Columns in dataset: %s", dataset.full_dataset.columns)
             raise KeyError("'Result' column not found.")
 
+        if cols_to_remove is not None:
+            dataset.remove_columns(cols_to_remove)
+
         # Remove 'Result' from features for preprocessing
         features = dataset.full_dataset.drop(columns=["Result"])
+        print(features)
         numeric_features = features.select_dtypes(include=["int64", "float64"]).columns
+        print(numeric_features)
         preprocessor = ColumnTransformer(
             transformers=[
                 ("num", StandardScaler(), numeric_features),
                 ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
             ]
         )
+        print(pipeline)
         pipeline = Pipeline(
             steps=[
                 ("preprocessor", preprocessor),
@@ -237,12 +273,18 @@ def preprocess_data(
                 ),
             ]
         )
+
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        )
+        output_path = os.path.join(project_root, "data", "02_transformed_data")
+        os.makedirs(output_path, exist_ok=True)
         dataset.full_dataset.to_csv(
-            "data\\02_processed_data\\processed_data.csv", index=False
+            os.path.join(output_path, "transformed_data.csv"), index=False
         )
         dataset.split_data("Result")
     except Exception as e:
-        logger.error("Unexpected error in preprocess_data function: %s", e)
+        logger.error("Unexpected error in transformed_data function: %s", e)
 
     return (
         dataset.x_train,
