@@ -1,6 +1,6 @@
 import logging
 from typing import Union
-from autogluon.tabular import TabularDataset, TabularPredictor
+from autogluon.tabular import TabularPredictor
 import pandas as pd
 from sklearn.pipeline import Pipeline
 

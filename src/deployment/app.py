@@ -79,9 +79,12 @@ parser.add_argument(
 args = parser.parse_args()
 api = args.api
 
-
-dirname = os.path.dirname(os.path.dirname(__file__))
-model_path = os.path.join(dirname, "models", "models", "KNeighborsDist", "model.pkl")
+project_root = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+)
+model_path = os.path.join(
+    project_root, "models", "models", "KNeighborsDist", "model.pkl"
+)
 
 with open(model_path, "rb") as model_file:
     model = pickle.load(model_file)

@@ -4,7 +4,7 @@ from data_preparation.merge_files import merge_files
 from data_preparation.data_preprocessing import transform_data
 from data_science.machine_learning import machine_learning
 from data_science.evaluate_model import evaluate_model
-from data_science.release_model import release_model
+from deployment.release_model import release_model
 
 
 def main():
@@ -121,7 +121,7 @@ def main():
     evaluate_model(
         x_test, y_test, model, args.n_samples_evaluate, args.random_state_evaluate
     )
-    # release_model()
+    release_model()
 
 
 if __name__ == "__main__":

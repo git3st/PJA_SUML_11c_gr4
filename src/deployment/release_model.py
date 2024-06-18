@@ -2,6 +2,7 @@ import pickle
 from sklearn.base import is_classifier
 from data_preparation.data_preprocessing import transform_data
 import logging
+import os
 
 
 def create_error_logger() -> logging.Logger:
@@ -34,7 +35,14 @@ def release_model():
     """
     logger = create_error_logger()
     try:
-        with open("data\\03_models\\chess_game_result_classifier.pkl", "wb") as f:
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        )
+        output_path = os.path.join(
+            project_root, "models", "models", "chess_game_result_classifier.pkl"
+        )
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        with open(output_path, "wb") as f:
             pickle.dump((transform_data, is_classifier), f)
     except (FileNotFoundError, PermissionError) as e:
         logger.error("Error opening file for writing: %s", e)

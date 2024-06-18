@@ -273,14 +273,14 @@ def transform_data(
                 ),
             ]
         )
+
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        )
+        output_path = os.path.join(project_root, "data", "02_transformed_data")
+        os.makedirs(output_path, exist_ok=True)
         dataset.full_dataset.to_csv(
-            os.makedirs(
-                os.path.join(
-                    parent_dir, "data", "02_transformed_data", "transformed_data.csv"
-                ),
-                exist_ok=True,
-            ),
-            index=False,
+            os.path.join(output_path, "transformed_data.csv"), index=False
         )
         dataset.split_data("Result")
     except Exception as e:

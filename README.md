@@ -4,7 +4,7 @@ Repozytorium projektu SUML - lab 11c, grupa 4
 
 ## Tematyka projektu
 
-Aplikacji do Bukmarcherki Szachowej
+Aplikacji do Bukmarcherki Szachowej "Checkmate Prophet"
 
 ### Problematyka
 
@@ -82,4 +82,5 @@ Procedura wspierana dla następujących wersji oprogramowania:
 
 ### Uruchomienie aplikacji
 
-TO DO
+Z poziomu lokalizacji folderu projektu, uruchomić aplikację poleceniem:
+`streamlit run "src\deployment\app.py"`
