@@ -114,14 +114,17 @@ with open(model_path, "rb") as model_file:
     metadata = model.feature_metadata
     print(metadata)
 
-st.title("Chess Match Prediction")
+
+st.title("Prophet - AI Chess Prediction")
 
 st.write(
     """
 ## Provide the player names to see which one would win!
 """
 )
-st.image("data\\Checkmate-Prophet-03b.jpeg")
+st.logo(os.path.join(project_root, "data", "ichess.png"))
+st.sidebar.image(os.path.join(project_root, "data", "Checkmate-Prophet-03b.jpeg"))
+st.sidebar.markdown("POWERED BY PJAIT STUDENTS - PLEASE LET US PASS")
 
 white = st.text_input("White:")
 black = st.text_input("Black:")
