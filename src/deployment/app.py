@@ -55,32 +55,43 @@ def get_elo(user, game_mode, api_key):
             data = response.json()
             rating = int(data["perfs"][game_mode]["rating"])
         else:
-            st.error('Error - we could not communicate with the Lichess backend server (not our fault!)')
+            st.error(
+                "Error - we could not communicate with the Lichess backend server (not our fault!)"
+            )
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Error fetching Lichess data for user '{user}': {e}")
-        st.error('Error - we could not communicate with the Lichess backend server (not our fault!)')
+        st.error(
+            "Error - we could not communicate with the Lichess backend server (not our fault!)"
+        )
     except KeyError as e:
         logger.error(f"Elo rating data not found for user '{user}': {e}")
-        st.error('Error - we could not communicate with the Lichess backend server (not our fault!)')
+        st.error(
+            "Error - we could not communicate with the Lichess backend server (not our fault!)"
+        )
     except ValueError as e:
         logger.error(f"Invalid Elo rating format for user '{user}': {e}")
-        st.error('Error - we could not communicate with the Lichess backend server (not our fault!)')
+        st.error(
+            "Error - we could not communicate with the Lichess backend server (not our fault!)"
+        )
     except Exception as e:  # Catch-all for unexpected errors
         logger.error(f"Unexpected error fetching Elo for '{user}': {e}")
-        st.error('Error - we could not communicate with the Lichess backend server (not our fault!)')
+        st.error(
+            "Error - we could not communicate with the Lichess backend server (not our fault!)"
+        )
     return rating
 
 
 def fake_loader(final_result):
-    msg = st.toast('Fetching data for the players...')
+    msg = st.toast("Fetching data for the players...")
     time.sleep(2)
-    msg.toast('Evaluating game performance...')
+    msg.toast("Evaluating game performance...")
     time.sleep(2)
-    msg.toast('Comparing players...')
+    msg.toast("Comparing players...")
     time.sleep(2)
-    msg.toast('Ready!')
+    msg.toast("Ready!")
     st.success(final_result)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -110,13 +121,12 @@ st.write(
 ## Provide the player names to see which one would win!
 """
 )
-
+st.image("data\\Checkmate-Prophet-03b.jpeg")
 
 white = st.text_input("White:")
 black = st.text_input("Black:")
-modes = ['bullet', 'blitz', 'rapid', 'classical']
+modes = ["bullet", "blitz", "rapid", "classical"]
 game_mode = st.selectbox("Game mode:", modes)
-
 
 if st.button("Predict"):
     white_elo = get_elo(white, game_mode, api)
@@ -135,8 +145,8 @@ if st.button("Predict"):
 
     prediction = model.predict(input_data)
     if prediction[0] == 0:
-        final_result = f'{black} would win with {white} in a {game_mode} game!'
+        final_result = f"{black} would win with {white} in a {game_mode} game!"
     elif prediction[0] == 2:
-        final_result = f'{white} would win with {black} in a {game_mode} game!'
+        final_result = f"{white} would win with {black} in a {game_mode} game!"
     fake_loader(final_result=final_result)
     st.balloons()
