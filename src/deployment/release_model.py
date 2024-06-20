@@ -4,7 +4,6 @@ from data_preparation.data_preprocessing import transform_data
 import logging
 import os
 
-
 def create_error_logger() -> logging.Logger:
     """
     Creates a logger to record errors during pipeline execution.
@@ -16,8 +15,7 @@ def create_error_logger() -> logging.Logger:
     logger.setLevel(logging.ERROR)
     return logger
 
-
-def release_model():
+def release_model(model):
     """
     Saves the trained model to a pickle file.
 
@@ -25,7 +23,7 @@ def release_model():
     during the file writing and pickling process.
 
     Args:
-        None
+        model: The trained model to be saved.
 
     Raises:
         FileNotFoundError: If the specified file or directory path is not found.
@@ -43,10 +41,11 @@ def release_model():
         )
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "wb") as f:
-            pickle.dump((transform_data, is_classifier), f)
+            pickle.dump(model, f)
     except (FileNotFoundError, PermissionError) as e:
         logger.error("Error opening file for writing: %s", e)
     except pickle.PicklingError as e:
         logger.error("Error pickling model objects: %s", e)
     except Exception as e:
         logger.error("Unexpected error during model release: %s", e)
+

@@ -5,7 +5,11 @@ from data_preparation.data_preprocessing import transform_data
 from data_science.machine_learning import machine_learning
 from data_science.evaluate_model import evaluate_model
 from deployment.release_model import release_model
+import wandb
 
+def setup_wandb(project_name: str, api_key: str):
+    wandb.login(key=api_key)
+    wandb.init(project=project_name)
 
 def main():
     current_path = os.path.realpath(__file__)
@@ -92,8 +96,21 @@ def main():
         default=0,
         help="Random state for evaluation samples.",
     )
+    parser.add_argument(
+        "--wandb_project",
+        type=str,
+        help="WandB project name",
+    )
+    parser.add_argument(
+        "--wandb_api_key",
+        type=str,
+        help="WandB API key",
+    )
 
     args = parser.parse_args()
+
+    wandb.login(key=args.wandb_api_key)
+    wandb.init(project=args.wandb_project)
 
     merge_files(args.file_prefix, args.num_files, args.output_file)
 
@@ -107,22 +124,49 @@ def main():
         random_state_pipeline=args.random_state_pipeline,
     )
 
-    model = machine_learning(
+    # Train and evaluate AutoML model
+    model_automl = machine_learning(
         x_train,
         y_train,
         validate_set,
-        args.use_automl,
-        args.n_samples,
-        args.time_limit,
-        args.n_estimators,
-        args.seed,
-        pipeline,
+        use_automl=True,
+        n_samples=args.n_samples,
+        time_limit=args.time_limit,
+        n_estimators=args.n_estimators,
+        random_state=args.seed,
+        pipeline=pipeline
     )
-    evaluate_model(
-        x_test, y_test, model, args.n_samples_evaluate, args.random_state_evaluate
+    accuracy_automl, _ = evaluate_model(
+        x_test, y_test, model_automl, args.n_samples_evaluate, args.random_state_evaluate
     )
-    release_model()
 
+    # Train and evaluate ML pipeline model
+    model_ml = machine_learning(
+        x_train,
+        y_train,
+        validate_set,
+        use_automl=False,
+        n_samples=args.n_samples,
+        time_limit=args.time_limit,
+        n_estimators=args.n_estimators,
+        random_state=args.seed,
+        pipeline=pipeline
+    )
+    accuracy_ml, _ = evaluate_model(
+        x_test, y_test, model_ml, args.n_samples_evaluate, args.random_state_evaluate
+    )
+
+    # Compare and select the best model
+    if accuracy_automl > accuracy_ml:
+        best_model = model_automl
+        best_model_type = "AutoML"
+    else:
+        best_model = model_ml
+        best_model_type = "ML Pipeline"
+
+    wandb.log({"best_model_type": best_model_type})
+    
+    release_model(best_model)
 
 if __name__ == "__main__":
     main()
