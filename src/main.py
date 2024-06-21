@@ -137,7 +137,7 @@ def main():
         pipeline=pipeline
     )
     accuracy_automl, _ = evaluate_model(
-        x_test, y_test, model_automl, args.n_samples_evaluate, args.random_state_evaluate
+        x_test, y_test, model_automl, args.n_samples_evaluate, args.random_state_evaluate, model_type="AutoML"
     )
 
     # Train and evaluate ML pipeline model
@@ -153,7 +153,7 @@ def main():
         pipeline=pipeline
     )
     accuracy_ml, _ = evaluate_model(
-        x_test, y_test, model_ml, args.n_samples_evaluate, args.random_state_evaluate
+        x_test, y_test, model_ml, args.n_samples_evaluate, args.random_state_evaluate, model_type="ML"
     )
 
     # Compare and select the best model
