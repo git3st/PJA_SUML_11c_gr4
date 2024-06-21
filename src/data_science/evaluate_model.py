@@ -7,22 +7,50 @@ from sklearn.metrics import (
     recall_score,
     f1_score,
     confusion_matrix,
+    classification_report
 )
 import pandas as pd
 from sklearn.pipeline import Pipeline
-
+import wandb
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 def create_error_logger() -> logging.Logger:
-    """
-    Creates a logger to record errors during pipeline execution.
-
-    Returns:
-        logging.Logger: The configured logger object.
-    """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     return logger
 
+def log_classification_report_to_wandb(report, prefix="classification_report"):
+    for key, value in report.items():
+        if isinstance(value, dict):
+            for sub_key, sub_value in value.items():
+                wandb.log({f"{prefix}.{key}.{sub_key}": sub_value})
+        else:
+            wandb.log({f"{prefix}.{key}": value})
+
+def plot_metrics(metrics, model_type):
+    steps = np.arange(len(metrics['accuracy']))
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.plot(steps, metrics['accuracy'], label='Accuracy', marker='o')
+    plt.plot(steps, metrics['precision'], label='Precision', marker='o')
+    plt.plot(steps, metrics['recall'], label='Recall', marker='o')
+    plt.plot(steps, metrics['f1_score'], label='F1 Score', marker='o')
+    plt.xlabel('Steps')
+    plt.ylabel('Scores')
+    plt.title(f'{model_type} Model Metrics')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    sns.heatmap(metrics['confusion_matrix'][-1], annot=True, fmt='d', cmap='Blues')
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title(f'{model_type} Confusion Matrix')
+
+    wandb.log({f"{model_type}_metrics_plot": wandb.Image(plt)})
+    plt.close()
 
 def evaluate_model(
     x_test: pd.DataFrame,
@@ -30,56 +58,47 @@ def evaluate_model(
     predictor: Union[TabularPredictor, Pipeline],
     n_samples_evaluate: int,
     random_state_evaluate: int,
+    model_type: str
 ):
-    """Evaluates a trained machine learning model's performance on a test dataset.
-
-    This function handles evaluation for two types of models:
-        - AutoGluon's TabularPredictor
-        - Scikit-learn Pipeline with a preprocessor and classifier steps
-
-    If the predictor is a TabularPredictor, it evaluates using the built-in leaderboard and prints predictions.
-    If the predictor is a Scikit-learn Pipeline, it first preprocesses a sample of the test data, makes predictions,
-    and then calculates common classification metrics (accuracy, precision, recall, F1-score) and the confusion matrix.
-    The results are printed to the console.
-
-    Args:
-        x_test (pd.DataFrame): Features for the test set.
-        y_test (pd.Series): True labels for the test set.
-        predictor: The trained machine learning model. Must be either:
-            - TabularPredictor: An AutoGluon predictor object.
-            - Pipeline: A Scikit-learn pipeline that includes a preprocessor step (named "preprocessor")
-                        and a classifier step (named "classifier").
-        n_samples_evaluate (int): Number of samples to randomly select from the test set for evaluation.
-        random_state_evaluate (int): Random seed for reproducibility of sampling.
-
-    Raises:
-        ValueError:
-            - If the input data for prediction is invalid or incorrectly formatted.
-            - If metric calculation fails due to mismatched input or unsupported types.
-        KeyError: If a required column or step name is missing in the input data or pipeline.
-    """
     logger = create_error_logger()
+    accuracy = []
+    precision = []
+    recall = []
+    f1_score_list = []
+    confusion_matrices = []
+    metrics = {}
     try:
-        if isinstance(predictor, TabularPredictor):
-            # AutoGluon TabularPredictor
-            test_data = TabularDataset(
-                x_test.sample(
-                    n=n_samples_evaluate,
-                    random_state=random_state_evaluate,
-                    replace=True,
-                )
-            )
-            predictions = predictor.predict(test_data)
-            print(predictor.leaderboard())
-            print(predictions)
-        else:
-            # Scikit-learn Pipeline
-            # Sample and preprocess test data
-            x_test_sampled = x_test.sample(
-                n=n_samples_evaluate, random_state=random_state_evaluate
-            )
-            y_test_sampled = y_test.loc[x_test_sampled.index]
+        sample_size = min(n_samples_evaluate, len(x_test))
+        x_test_sampled = x_test.sample(
+            n=sample_size, random_state=random_state_evaluate
+        )
+        y_test_sampled = y_test.loc[x_test_sampled.index]
 
+        if isinstance(predictor, TabularPredictor):
+            test_data = TabularDataset(x_test_sampled)
+            predictions = predictor.predict(test_data)
+            accuracy.append(accuracy_score(y_test_sampled, predictions))
+            precision.append(precision_score(y_test_sampled, predictions, average="weighted"))
+            recall.append(recall_score(y_test_sampled, predictions, average="weighted"))
+            f1_score_list.append(f1_score(y_test_sampled, predictions, average="weighted"))
+            confusion_matrices.append(confusion_matrix(y_test_sampled, predictions))
+            class_report = classification_report(y_test_sampled, predictions, output_dict=True)
+
+            metrics = {
+                "accuracy": accuracy,
+                "precision": precision,
+                "recall": recall,
+                "f1_score": f1_score_list,
+                "confusion_matrix": confusion_matrices
+            }
+
+            wandb.log({f"{model_type}_accuracy": accuracy[-1]})
+            wandb.log({f"{model_type}_precision": precision[-1]})
+            wandb.log({f"{model_type}_recall": recall[-1]})
+            wandb.log({f"{model_type}_f1_score": f1_score_list[-1]})
+            log_classification_report_to_wandb(class_report, prefix=f"{model_type}_classification_report")
+
+        else:
             x_test_processed = predictor.named_steps["preprocessor"].transform(
                 x_test_sampled
             )
@@ -87,35 +106,45 @@ def evaluate_model(
                 logger.error("Missing 'classifier' step in the pipeline.")
                 raise ValueError("Invalid pipeline: 'classifier' step not found.")
 
-            # Debug: Print shapes of x_test_processed and y_test_sampled
-            print(
-                f"x_test_processed shape: {x_test_processed.shape}, y_test_sampled shape: {y_test_sampled.shape}"
-            )
-
-            # Predict and print evaluation metrics
             y_pred = predictor.named_steps["classifier"].predict(x_test_processed)
 
-            try:
-                accuracy = accuracy_score(y_test_sampled, y_pred)
-                precision = precision_score(y_test_sampled, y_pred, average="weighted")
-                recall = recall_score(y_test_sampled, y_pred, average="weighted")
-                f1 = f1_score(y_test_sampled, y_pred, average="weighted")
-                conf_matrix = confusion_matrix(y_test_sampled, y_pred)
+            accuracy.append(accuracy_score(y_test_sampled, y_pred))
+            precision.append(precision_score(y_test_sampled, y_pred, average="weighted"))
+            recall.append(recall_score(y_test_sampled, y_pred, average="weighted"))
+            f1_score_list.append(f1_score(y_test_sampled, y_pred, average="weighted"))
+            confusion_matrices.append(confusion_matrix(y_test_sampled, y_pred))
+            class_report = classification_report(y_test_sampled, y_pred, output_dict=True)
 
-                print("Accuracy:", accuracy)
-                print("Precision:", precision)
-                print("Recall:", recall)
-                print("F1 Score:", f1)
-                print("Confusion Matrix:\n", conf_matrix)
-            except ValueError as ve:
-                logger.error("ValueError during metric calculation: %s", ve)
-                raise
+            print("Accuracy:", accuracy[-1])
+            print("Precision:", precision[-1])
+            print("Recall:", recall[-1])
+            print("F1 Score:", f1_score_list[-1])
+            print("Confusion Matrix:\n", confusion_matrices[-1])
+
+            metrics = {
+                "accuracy": accuracy,
+                "precision": precision,
+                "recall": recall,
+                "f1_score": f1_score_list,
+                "confusion_matrix": confusion_matrices
+            }
+
+            wandb.log({f"{model_type}_accuracy": accuracy[-1]})
+            wandb.log({f"{model_type}_precision": precision[-1]})
+            wandb.log({f"{model_type}_recall": recall[-1]})
+            wandb.log({f"{model_type}_f1_score": f1_score_list[-1]})
+            log_classification_report_to_wandb(class_report, prefix=f"{model_type}_classification_report")
+
+        plot_metrics(metrics, model_type)
+
     except ValueError as ve:
         logger.error("ValueError in evaluation: %s", ve)
         raise
     except KeyError as ke:
         logger.error("KeyError in evaluation: %s", ke)
         raise
-    except Exception as e:  # Catch-all exception for unexpected errors
-        logger.error("Unexpected error in evaluation: %s", e)
+    except Exception as e:
+        logger.error("Error in evaluation: %s", e)
         raise
+
+    return accuracy[-1], predictor

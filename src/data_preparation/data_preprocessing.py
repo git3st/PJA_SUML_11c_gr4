@@ -94,7 +94,6 @@ def transform_data(
         "Black_tosViolation",
         "Date",
         "ECO",
-        "Event",
         "GameID",
         "Moves",
         "Opening",
@@ -130,10 +129,6 @@ def transform_data(
         "Opening": "Unknown",
     },
     clean_outliers: bool = False,
-    # cols_to_rename: Dict[str, str] = {"Date": "Day"},
-    # cols_to_round: List[str] = ["Average_White_Play_Time", "Average_Black_Play_Time"],
-    # cols_to_transform_date: List[str] = ["Date"],
-    # cols_to_transform_time: List[str] = ["Time"],
     cols_to_transform: Dict[str, Dict[str, str]] = {
         "Result": {"1-0": "White", "0-1": "Black", "1/2-1/2": "Draw"},
         "Event": {"tournament*": "tournament", "swiss*": "swiss"},
@@ -142,7 +137,7 @@ def transform_data(
     cols_to_normalize: List[str] = None,
     categorical_features: List[str] = [
         "Event",
-        "Day",
+        "Day",  # Remove "Day" if it doesn't exist
         "Time_TimeOfDay",
         "White_is_deleted",
         "White_profile_flag",
@@ -172,7 +167,6 @@ def transform_data(
         cols_to_fill_numbers (Dict[str, str], optional): Numeric columns to fill with their mean, and their data types. Defaults to a predefined dictionary.
         fill_string_values (Dict[str, str], optional): String columns and values to fill missing values with. Defaults to a predefined dictionary.
         clean_outliers (bool, optional): Whether to remove outliers. Defaults to False.
-        cols_to_rename (Dict[str, str], optional): Dictionary for column renaming. Defaults to None.
         cols_to_transform (Dict[str, Dict[str, str]], optional): Dictionary mapping columns and value replacements. Defaults to {"Result": {"1-0": "White", "0-1": "Black", "1/2-1/2": "Draw"}}.
         clean_missing_vals (bool, optional): Whether to drop rows with missing values. Defaults to True.
         cols_to_normalize (List[str], optional): List of columns to normalize to [0, 1]. Defaults to None.
@@ -208,10 +202,6 @@ def transform_data(
             dataset.fill_missing_number_vals(cols_to_fill_numbers)
         if fill_string_values is not None:
             dataset.fill_missing_string_vals(fill_string_values)
-        # if cols_to_transform_date is not None:
-        #    dataset.transform_date_to_day(cols_to_transform_date)
-        # if cols_to_transform_time is not None:
-        #    dataset.transform_time_to_category(cols_to_transform_time)
         if cols_to_transform is not None:
             dataset.transform_text_values(cols_to_transform)
 
@@ -229,8 +219,6 @@ def transform_data(
             dataset.clean_outliers()
         if clean_missing_vals is True:
             dataset.clean_missing_vals()
-        # if cols_to_rename is not None:
-        #    dataset.rename_columns(cols_to_rename)
         if cols_to_normalize is not None:
             dataset.normalize(cols_to_normalize)
 
@@ -249,6 +237,9 @@ def transform_data(
         if cols_to_remove is not None:
             dataset.remove_columns(cols_to_remove)
 
+        # Remove 'Day' if it doesn't exist in the final dataframe
+        available_categorical_features = [col for col in categorical_features if col in dataset.full_dataset.columns]
+
         # Remove 'Result' from features for preprocessing
         features = dataset.full_dataset.drop(columns=["Result"])
         print(features)
@@ -257,7 +248,7 @@ def transform_data(
         preprocessor = ColumnTransformer(
             transformers=[
                 ("num", StandardScaler(), numeric_features),
-                ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+                ("cat", OneHotEncoder(handle_unknown="ignore"), available_categorical_features),
             ]
         )
         print(pipeline)
@@ -294,3 +285,4 @@ def transform_data(
         dataset.validate_set,
         pipeline,
     )
+
