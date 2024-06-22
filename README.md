@@ -84,3 +84,16 @@ Procedura wspierana dla następujących wersji oprogramowania:
 
 Z poziomu lokalizacji folderu projektu, uruchomić aplikację poleceniem:
 `streamlit run "src\deployment\app.py"`
+
+### Uruchamianie klasy main generującej model
+
+Aby uruchomić klasę main, która generuje model, należy wykonać następującą komendę z terminala, będąc w lokalizacji folderu projektu:
+
+```bash
+python src/main.py --file_prefix=<ścieżka_do_pliku> --num_files=<liczba_plików> --output_file=<ścieżka_do_pliku_wyjściowego> --use_automl --train=<wartość> --test=<wartość> --validation=<wartość> --seed=<wartość> --n_samples=<liczba_próbek> --time_limit=<limit_czasu> --n_estimators=<liczba_estymatorów> --n_estimators_pipeline=<liczba_estymatorów_pipeline> --random_state_pipeline=<wartość> --n_samples_evaluate=<liczba_próbek_do_ewaluacji> --random_state_evaluate=<wartość> --wandb_project=<nazwa_projektu> --wandb_api_key=<klucz_api_wandb>
+```
+Przykładowa komenda:
+
+```bash
+python src/main.py --file_prefix=data/01_raw_data/games_metadata_profile_2024_01 --num_files=16 --output_file=data/01_raw_data/full_dataset.csv --use_automl --train=0.8 --test=0.1 --validation=0.1 --seed=50 --n_samples=500 --time_limit=60 --n_estimators=100 --n_estimators_pipeline=100 --random_state_pipeline=42 --n_samples_evaluate=100 --random_state_evaluate=0 --wandb_project=Checkmate_Prophet --wandb_api_key=<twój_klucz_api_wandb>
+```
