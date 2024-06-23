@@ -238,7 +238,9 @@ def transform_data(
             dataset.remove_columns(cols_to_remove)
 
         # Remove 'Day' if it doesn't exist in the final dataframe
-        available_categorical_features = [col for col in categorical_features if col in dataset.full_dataset.columns]
+        available_categorical_features = [
+            col for col in categorical_features if col in dataset.full_dataset.columns
+        ]
 
         # Remove 'Result' from features for preprocessing
         features = dataset.full_dataset.drop(columns=["Result"])
@@ -248,7 +250,11 @@ def transform_data(
         preprocessor = ColumnTransformer(
             transformers=[
                 ("num", StandardScaler(), numeric_features),
-                ("cat", OneHotEncoder(handle_unknown="ignore"), available_categorical_features),
+                (
+                    "cat",
+                    OneHotEncoder(handle_unknown="ignore"),
+                    available_categorical_features,
+                ),
             ]
         )
         print(pipeline)
@@ -285,4 +291,3 @@ def transform_data(
         dataset.validate_set,
         pipeline,
     )
-

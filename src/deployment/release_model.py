@@ -4,6 +4,7 @@ from data_preparation.data_preprocessing import transform_data
 import logging
 import os
 
+
 def create_error_logger() -> logging.Logger:
     """
     Creates a logger to record errors during pipeline execution.
@@ -14,6 +15,7 @@ def create_error_logger() -> logging.Logger:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     return logger
+
 
 def release_model(model):
     """
@@ -48,4 +50,3 @@ def release_model(model):
         logger.error("Error pickling model objects: %s", e)
     except Exception as e:
         logger.error("Unexpected error during model release: %s", e)
-

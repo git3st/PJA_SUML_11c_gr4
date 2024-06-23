@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 import wandb
 
+
 def create_error_logger() -> logging.Logger:
     """
     Creates a logger to record errors during pipeline execution.
@@ -15,6 +16,7 @@ def create_error_logger() -> logging.Logger:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     return logger
+
 
 def machine_learning(
     x_train: pd.DataFrame,
@@ -57,13 +59,17 @@ def machine_learning(
     try:
         if use_automl:
             # Merge with x_train and y_train
-            train_data = x_train.sample(n=n_samples, random_state=random_state, replace=True)
+            train_data = x_train.sample(
+                n=n_samples, random_state=random_state, replace=True
+            )
             train_data["Result"] = y_train.loc[train_data.index]
 
             # Debug: Print columns in train_data
             print("Columns in train_data for AutoML:", train_data.columns)
-            predictor = TabularPredictor(label="Result", path="models", eval_metric="accuracy").fit(train_data, time_limit=time_limit, presets="medium_quality")
-            
+            predictor = TabularPredictor(
+                label="Result", path="models", eval_metric="accuracy"
+            ).fit(train_data, time_limit=time_limit, presets="medium_quality")
+
             # Log AutoML training to WandB
             wandb.log({"model_type": "AutoML"})
             return predictor
@@ -77,7 +83,7 @@ def machine_learning(
             x_train_processed = pipeline.named_steps["preprocessor"].transform(x_train)
             model = pipeline.named_steps["classifier"]
             model.fit(x_train_processed, y_train)
-            
+
             # Log ML training to WandB
             wandb.log({"model_type": "ML Pipeline"})
             return pipeline
