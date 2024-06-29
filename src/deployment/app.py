@@ -110,7 +110,7 @@ project_root = os.path.dirname(
 model_path = "model.pkl"
 
 
-with open("./model.pkl", "rb") as model_file:
+with open("https://raw.githubusercontent.com/git3st/PJA_SUML_11c_gr4/main/src/deployment/model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
     metadata = model.feature_metadata
     print(metadata)
