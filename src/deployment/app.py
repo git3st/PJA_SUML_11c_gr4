@@ -106,9 +106,9 @@ api = 'lip_5KluHlHbw0BeCU81zlhu'
 project_root = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 )
-model_path = os.path.join(
-    project_root, "models", "models", "KNeighborsDist", "model.pkl"
-)
+
+model_path = "model.pkl"
+
 
 with open(model_path, "rb") as model_file:
     model = pickle.load(model_file)
