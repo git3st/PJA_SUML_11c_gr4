@@ -110,7 +110,7 @@ project_root = os.path.dirname(
 model_path = "model.pkl"
 
 
-with open("model.pkl", "rb") as model_file:
+with open("./model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
     metadata = model.feature_metadata
     print(metadata)
