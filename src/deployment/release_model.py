@@ -17,7 +17,7 @@ def create_error_logger() -> logging.Logger:
     return logger
 
 
-def release_model():
+def release_model(model):
     """
     Saves the trained model to a pickle file.
 
@@ -25,7 +25,7 @@ def release_model():
     during the file writing and pickling process.
 
     Args:
-        None
+        model: The trained model to be saved.
 
     Raises:
         FileNotFoundError: If the specified file or directory path is not found.
@@ -43,7 +43,7 @@ def release_model():
         )
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "wb") as f:
-            pickle.dump((transform_data, is_classifier), f)
+            pickle.dump(model, f)
     except (FileNotFoundError, PermissionError) as e:
         logger.error("Error opening file for writing: %s", e)
     except pickle.PicklingError as e:

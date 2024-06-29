@@ -3,6 +3,7 @@ from typing import Union
 from autogluon.tabular import TabularPredictor
 import pandas as pd
 from sklearn.pipeline import Pipeline
+import wandb
 
 
 def create_error_logger() -> logging.Logger:
@@ -68,6 +69,9 @@ def machine_learning(
             predictor = TabularPredictor(
                 label="Result", path="models", eval_metric="accuracy"
             ).fit(train_data, time_limit=time_limit, presets="medium_quality")
+
+            # Log AutoML training to WandB
+            wandb.log({"model_type": "AutoML"})
             return predictor
         else:
             if pipeline is None:
@@ -79,6 +83,9 @@ def machine_learning(
             x_train_processed = pipeline.named_steps["preprocessor"].transform(x_train)
             model = pipeline.named_steps["classifier"]
             model.fit(x_train_processed, y_train)
+
+            # Log ML training to WandB
+            wandb.log({"model_type": "ML Pipeline"})
             return pipeline
     except ValueError as ve:
         logger.error("ValueError in machine learning process: %s", ve)
